@@ -1,16 +1,25 @@
-# This is a sample Python script.
+import sklearn
+from sklearn.datasets import fetch_openml
+import matplotlib.pyplot as plt
+import numpy as np
 
-# Press ⌃R to execute it or replace it with your code.
-# Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
+# Carica il dataset MNIST
+mnist = fetch_openml('mnist_784', as_frame=False, parser='liac-arff')
+Xraw, Yraw = mnist['data'], mnist['target']
 
+# Non è necessario convertire Xraw, è già un array NumPy
+# Xraw = Xraw.to_numpy()  # Questa riga può essere rimossa
+Yraw = Yraw.astype(int)
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press ⌘F8 to toggle the breakpoint.
+# Visualizza le prime 5 righe di Xraw e le prime 5 etichette in Yraw
+print("First 5 rows of Xraw:")
+print(Xraw[:5])
+print("First 5 labels in Yraw:")
+print(Yraw[:5])
 
+# Visualizza la prima immagine (opzionale)
+first_image = Xraw[0].reshape(28, 28)  # MNIST images are 28x28 pixels
+plt.imshow(first_image, cmap='gray')
+plt.title(f"Label: {Yraw[0]}")
+plt.show()
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
