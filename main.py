@@ -1,6 +1,8 @@
 from sklearn.datasets import fetch_openml
 import matplotlib.pyplot as plt
 import numpy as np
+from tabulate import tabulate
+np.random.seed(42)
 
 
 def read_MNIST():
@@ -205,6 +207,48 @@ def WidrowHoffLMS(Xraw, Y, d, eta, epochs):
     return W, X, MSE_results_LMS
 
 
+def MSE_comparison_plot(MSE_results, epochs_list):
+    """
+    Function that plots the MSE of the Widrow-Hoff LMS algorithm for different learning rates (eta)
+    on separate plots for each number of epochs.
+
+    :param MSE_results: List of lists, where each list contains [MSE_results_LMS, epochs, eta]
+    :param epochs_list: List of all epochs to create separate plots for each.
+    :return: None
+    """
+    for epochs in epochs_list:
+        plt.figure(figsize=(10, 6))
+        for result in MSE_results:
+            MSE_results_LMS, result_epochs, eta = result
+            if result_epochs == epochs:
+                plt.plot(range(1, epochs + 1), MSE_results_LMS, marker='o', label=f'eta={eta}')
+
+        plt.xlabel('Number of Epochs')
+        plt.ylabel('MSE')
+        plt.title(f'MSE vs. Number of Epochs for {epochs} Epochs')
+        plt.legend()
+        plt.grid(True)
+        plt.show()
+
+
+def ERRORS_comparison_table(ERRORS):
+    """
+    Function to print a table with errors, epochs, and eta.
+
+    :param ERRORS: List of lists, where each list contains [error_value, epochs, eta]
+    :return: None
+    """
+    # Prepare data for the table
+    table_data = [["Errors", "Epochs", "Learning Rate (eta)"]]
+
+    for error in ERRORS:
+        error_value, epochs, eta = error
+        table_data.append([error_value, epochs, eta])
+
+    # Print the table
+    print(tabulate(table_data, headers="firstrow", tablefmt="pretty"))
+
+
 def main():
     #####################################################################################
     ###################################### POINT a ######################################
@@ -270,7 +314,7 @@ def main():
     # setting d
     d = 100
     # setting eta
-    eta = 0.001
+    eta = 0.005
     # setting number of epochs
     epochs = 10
 
@@ -287,6 +331,35 @@ def main():
     ERROR = ERROR_predictor(Y, Y_pred)
     print("### Point d ###")
     print(f"Number of errors: {ERROR}")
+
+    #####################################################################################
+    ############################ POINT: improvement attempts ############################
+    #####################################################################################
+    # number of errors
+    ERRORS = []
+    # MSE of different epochs and etas
+    MSE_results = []
+
+    # tentative over different number of epochs
+    for epochs in [10, 20, 30, 40, 50]:
+        # tentative over different eta's
+        for eta in [0.0001, 0.001, 0.005]:
+            # run Widrow-Hoff LMS algorithm
+            W, X, MSE_results_LMS = WidrowHoffLMS(Xraw, Y, d, eta, epochs)
+
+            # save the MSE result
+            MSE_results.append([MSE_results_LMS, epochs, eta])
+
+            # predictor
+            Y_pred = predictor(X, W)
+
+            # ERRORs predictor computed and printed
+            ERRORS.append([ERROR_predictor(Y, Y_pred), epochs, eta])
+
+    # plot result
+    MSE_comparison_plot(MSE_results, [10, 20, 30, 40, 50])
+    # plot errors
+    ERRORS_comparison_table(ERRORS)
 
 
 main()
